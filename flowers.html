@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Varsha 🌹</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,400;0,500;1,400;1,500&family=Lato:wght=300;400&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{width:100%;height:100%;overflow:hidden;cursor:none;font-family:'Lato',sans-serif;background:#1a0a0f;}
 
@@ -102,13 +102,14 @@ const ctx    = canvas.getContext('2d');
 const W = canvas.width  = window.innerWidth;
 const H = canvas.height = window.innerHeight;
 
-// Build flower positions — dense scatter, 4 passes
 const STEP = 38;
 const items = [];
 
 function buildItems(){
   const passes = [[0,0],[STEP*.5,STEP*.5],[STEP*.25,STEP*.75],[STEP*.75,STEP*.25]];
   const cols = Math.ceil(W/STEP)+3, rows = Math.ceil(H/STEP)+3;
+  
+  // 1. Generate standard grid layout
   passes.forEach(([ox,oy])=>{
     for(let r=-1;r<=rows;r++){
       for(let c=-1;c<=cols;c++){
@@ -123,7 +124,6 @@ function buildItems(){
           flower: pick(FLOWERS),
           leaf1: pick(LEAVES),
           leaf2: pick(LEAVES),
-          // for parting animation
           ox:x, oy:y,
           tx:0, ty:0,
           progress:0,
@@ -131,13 +131,38 @@ function buildItems(){
       }
     }
   });
+
+  // 2. CRITICAL FIX: Explicitly bundle extra flowers tightly into the center 
+  // to ensure there is zero hollow space on launch.
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const centerFillRadius = Math.min(W, H) * 0.35; // Target area
+  
+  for(let i = 0; i < 250; i++) {
+    // Distribute randomly inside a circle at the center
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.sqrt(Math.random()) * centerFillRadius;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    
+    const fSize = rand(20,32);
+    const lSize = fSize*rand(.4,.52);
+    const rot   = rand(-25,25);
+    items.push({
+      x, y, fSize, lSize, rot,
+      flower: pick(FLOWERS),
+      leaf1: pick(LEAVES),
+      leaf2: pick(LEAVES),
+      ox:x, oy:y,
+      tx:0, ty:0,
+      progress:0,
+    });
+  }
 }
 buildItems();
 
-// Draw all flowers onto canvas instantly
 function drawAll(progress){
   ctx.clearRect(0,0,W,H);
-  // fill bg so no gaps show
   ctx.fillStyle = '#c94f6a';
   ctx.fillRect(0,0,W,H);
 
@@ -153,7 +178,7 @@ function drawAll(progress){
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(it.flower, 0, 0);
-    // leaves
+    
     ctx.save();
     ctx.rotate(-0.5);
     ctx.font = `${it.lSize}px serif`;
@@ -169,23 +194,20 @@ function drawAll(progress){
   ctx.globalAlpha = 1;
 }
 
-// Draw instantly on load — no delay, no animation
+// Draw instantly on load
 drawAll(0);
 
-// After 5s — animate flowers flying outward
 let startTime = null;
 const PART_DUR = 1100; // ms
 
 function partAnimation(ts){
   if(!startTime) startTime = ts;
   const p = Math.min((ts-startTime)/PART_DUR, 1);
-  // ease in-out
   const eased = p<.5 ? 2*p*p : -1+(4-2*p)*p;
   drawAll(eased);
   if(p<1){
     requestAnimationFrame(partAnimation);
   } else {
-    // done — hide canvas, show message
     canvas.style.transition='opacity .5s ease';
     canvas.style.opacity='0';
     document.getElementById('page-bg').classList.add('on');
@@ -195,7 +217,6 @@ function partAnimation(ts){
   }
 }
 
-// Precompute outward vectors for each item
 function prepareVectors(){
   const cx=W/2, cy=H/2;
   const diag = Math.sqrt(W*W+H*H);
@@ -209,6 +230,7 @@ function prepareVectors(){
 }
 prepareVectors();
 
+// Trigger animation after 5 seconds
 setTimeout(()=>{
   requestAnimationFrame(partAnimation);
 }, 5000);

@@ -5,9 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Varsha 🌹</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,400;0,500;1,400;1,500&family=Lato:wght=300;400&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{width:100%;height:100%;overflow:hidden;cursor:none;font-family:'Lato',sans-serif;background:#1a0a0f;}
+  
+  html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    cursor:none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background:#1a0a0f;
+  }
 
   #c{position:fixed;inset:0;z-index:50;display:block;}
 
@@ -36,11 +43,19 @@
     opacity:0;transition:opacity 1.8s ease,transform 1.8s cubic-bezier(0.22,1,0.36,1);
   }
   #message.visible{opacity:1;transform:translate(-50%,-50%) scale(1);}
-  #message .greeting{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(1.9rem,5vw,3.4rem);color:#8b1a2e;line-height:1.15;margin-bottom:.5rem;}
+  
+  #message .greeting{
+    font-family: Georgia, Cambria, serif;
+    font-style: italic;
+    font-size:clamp(1.9rem,5vw,3.4rem);
+    color:#8b1a2e;
+    line-height:1.15;
+    margin-bottom:.5rem;
+  }
   #message .greeting span{color:#c0435a;}
   .divider{width:56px;height:1.5px;background:linear-gradient(to right,transparent,#c0435a77,transparent);margin:.7rem auto 1rem;}
-  #message .body{font-family:'Lato',sans-serif;font-weight:300;font-size:clamp(.92rem,1.9vw,1.08rem);color:#4a1c28;line-height:1.95;letter-spacing:.025em;max-width:400px;margin:0 auto;}
-  #message .body strong{color:#8b1a2e;font-weight:400;font-family:'Playfair Display',serif;font-style:italic;}
+  #message .body{font-weight:300;font-size:clamp(.92rem,1.9vw,1.08rem);color:#4a1c28;line-height:1.95;letter-spacing:.025em;max-width:400px;margin:0 auto;}
+  #message .body strong{color:#8b1a2e;font-weight:400;font-family: Georgia, serif;font-style:italic;}
   #message .sign{margin-top:1.1rem;font-size:.82rem;color:#c0879a;letter-spacing:.08em;font-weight:300;}
 
   .trail-bloom{position:fixed;pointer-events:none;z-index:5;animation:trailUp 1.6s ease-out forwards;}
@@ -90,205 +105,217 @@
 <div id="hint">move to bloom · click to plant 🌹</div>
 
 <script>
-const FLOWERS = ['🌹','🌹','🌹','🌺','🌸','🌷','🪷','🌹','🌸','🌺','🌷','🌹'];
-const LEAVES  = ['🍃','🌿','🍀','🌱','🍃','🌿'];
-const AMBIENT = ['🌸','🌺','🌷','🌹','🪷','🍃','🌿'];
-function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function rand(a,b){return a+Math.random()*(b-a);}
+window.onload = function() {
+  const FLOWERS = ['🌹','🌹','🌹','🌺','🌸','🌷','🪷','🌹','🌸','🌺','🌷','🌹'];
+  const LEAVES  = ['🍃','🌿','🍀','🌱','🍃','🌿'];
+  const AMBIENT = ['🌸','🌺','🌷','🌹','🪷','🍃','🌿'];
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function rand(a,b){return a+Math.random()*(b-a);}
 
-// ── CANVAS CARPET ──
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
-const W = canvas.width  = window.innerWidth;
-const H = canvas.height = window.innerHeight;
-
-const STEP = 38;
-const items = [];
-
-function buildItems(){
-  const passes = [[0,0],[STEP*.5,STEP*.5],[STEP*.25,STEP*.75],[STEP*.75,STEP*.25]];
-  const cols = Math.ceil(W/STEP)+3, rows = Math.ceil(H/STEP)+3;
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
   
-  // 1. Generate standard grid layout
-  passes.forEach(([ox,oy])=>{
-    for(let r=-1;r<=rows;r++){
-      for(let c=-1;c<=cols;c++){
-        const x = c*STEP + ox + rand(-STEP*.38, STEP*.38);
-        const y = r*STEP + oy + rand(-STEP*.38, STEP*.38);
-        if(x<-STEP||x>W+STEP||y<-STEP||y>H+STEP) continue;
-        const fSize = rand(18,30);
-        const lSize = fSize*rand(.4,.52);
-        const rot   = rand(-25,25);
-        items.push({
-          x, y, fSize, lSize, rot,
-          flower: pick(FLOWERS),
-          leaf1: pick(LEAVES),
-          leaf2: pick(LEAVES),
-          ox:x, oy:y,
-          tx:0, ty:0,
-          progress:0,
-        });
-      }
-    }
-  });
+  let W = canvas.width  = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
 
-  // 2. CRITICAL FIX: Explicitly bundle extra flowers tightly into the center 
-  // to ensure there is zero hollow space on launch.
-  const centerX = W / 2;
-  const centerY = H / 2;
-  const centerFillRadius = Math.min(W, H) * 0.35; // Target area
-  
-  for(let i = 0; i < 250; i++) {
-    // Distribute randomly inside a circle at the center
-    const angle = Math.random() * Math.PI * 2;
-    const radius = Math.sqrt(Math.random()) * centerFillRadius;
-    const x = centerX + Math.cos(angle) * radius;
-    const y = centerY + Math.sin(angle) * radius;
+  const STEP = 38;
+  const items = [];
+
+  function buildItems(){
+    items.length = 0; // Clear array safely
+    const passes = [[0,0],[STEP*.5,STEP*.5],[STEP*.25,STEP*.75],[STEP*.75,STEP*.25]];
+    const cols = Math.ceil(W/STEP)+3, rows = Math.ceil(H/STEP)+3;
     
-    const fSize = rand(20,32);
-    const lSize = fSize*rand(.4,.52);
-    const rot   = rand(-25,25);
-    items.push({
-      x, y, fSize, lSize, rot,
-      flower: pick(FLOWERS),
-      leaf1: pick(LEAVES),
-      leaf2: pick(LEAVES),
-      ox:x, oy:y,
-      tx:0, ty:0,
-      progress:0,
+    passes.forEach(([ox,oy])=>{
+      for(let r=-1;r<=rows;r++){
+        for(let c=-1;c<=cols;c++){
+          const x = c*STEP + ox + rand(-STEP*.38, STEP*.38);
+          const y = r*STEP + oy + rand(-STEP*.38, STEP*.38);
+          if(x<-STEP||x>W+STEP||y<-STEP||y>H+STEP) continue;
+          const fSize = rand(18,30);
+          const lSize = fSize*rand(.4,.52);
+          const rot   = rand(-25,25);
+          items.push({
+            x, y, fSize, lSize, rot,
+            flower: pick(FLOWERS),
+            leaf1: pick(LEAVES),
+            leaf2: pick(LEAVES),
+            ox:x, oy:y,
+            tx:0, ty:0,
+          });
+        }
+      }
+    });
+
+    // Dense Center Filling
+    const centerX = W / 2;
+    const centerY = H / 2;
+    const centerFillRadius = Math.min(W, H) * 0.35;
+    
+    for(let i = 0; i < 250; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.sqrt(Math.random()) * centerFillRadius;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      
+      const fSize = rand(20,32);
+      const lSize = fSize*rand(.4,.52);
+      const rot   = rand(-25,25);
+      items.push({
+        x, y, fSize, lSize, rot,
+        flower: pick(FLOWERS),
+        leaf1: pick(LEAVES),
+        leaf2: pick(LEAVES),
+        ox:x, oy:y,
+        tx:0, ty:0,
+      });
+    }
+  }
+
+  function drawAll(progress){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#c94f6a';
+    ctx.fillRect(0,0,W,H);
+
+    items.forEach(it=>{
+      const x = it.ox + it.tx * progress;
+      const y = it.oy + it.ty * progress;
+      const alpha = 1 - progress;
+      ctx.globalAlpha = alpha;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((it.rot + progress*200) * Math.PI/180);
+      ctx.font = `${it.fSize}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(it.flower, 0, 0);
+      
+      ctx.save();
+      ctx.rotate(-0.5);
+      ctx.font = `${it.lSize}px serif`;
+      ctx.fillText(it.leaf1, -it.lSize*0.3, it.lSize*0.4);
+      ctx.restore();
+      ctx.save();
+      ctx.rotate(0.5);
+      ctx.font = `${it.lSize}px serif`;
+      ctx.fillText(it.leaf2, it.lSize*0.3, it.lSize*0.4);
+      ctx.restore();
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function prepareVectors(){
+    const cx=W/2, cy=H/2;
+    const diag = Math.sqrt(W*W+H*H);
+    items.forEach(it=>{
+      const dx = it.ox-cx, dy = it.oy-cy;
+      const dist = Math.sqrt(dx*dx+dy*dy)||1;
+      const push = diag * 0.9;
+      it.tx = (dx/dist)*push;
+      it.ty = (dy/dist)*push;
     });
   }
-}
-buildItems();
 
-function drawAll(progress){
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle = '#c94f6a';
-  ctx.fillRect(0,0,W,H);
+  // Initialize Canvas Setup safely
+  buildItems();
+  prepareVectors();
+  drawAll(0);
 
-  items.forEach(it=>{
-    const x = it.ox + it.tx * progress;
-    const y = it.oy + it.ty * progress;
-    const alpha = 1 - progress;
-    ctx.globalAlpha = alpha;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate((it.rot + progress*200) * Math.PI/180);
-    ctx.font = `${it.fSize}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(it.flower, 0, 0);
-    
-    ctx.save();
-    ctx.rotate(-0.5);
-    ctx.font = `${it.lSize}px serif`;
-    ctx.fillText(it.leaf1, -it.lSize*0.3, it.lSize*0.4);
-    ctx.restore();
-    ctx.save();
-    ctx.rotate(0.5);
-    ctx.font = `${it.lSize}px serif`;
-    ctx.fillText(it.leaf2, it.lSize*0.3, it.lSize*0.4);
-    ctx.restore();
-    ctx.restore();
-  });
-  ctx.globalAlpha = 1;
-}
+  let startTime = null;
+  const PART_DUR = 1100;
 
-// Draw instantly on load
-drawAll(0);
+  function partAnimation(ts){
+    if(!startTime) startTime = ts;
+    const p = Math.min((ts-startTime)/PART_DUR, 1);
+    const eased = p<.5 ? 2*p*p : -1+(4-2*p)*p;
+    drawAll(eased);
+    if(p<1){
+      requestAnimationFrame(partAnimation);
+    } else {
+      canvas.style.transition='opacity .5s ease';
+      canvas.style.opacity='0';
+      document.getElementById('page-bg').classList.add('on');
+      document.getElementById('message').classList.add('visible');
+      document.getElementById('hint').classList.add('visible');
+      setTimeout(()=>canvas.remove(), 600);
+    }
+  }
 
-let startTime = null;
-const PART_DUR = 1100; // ms
-
-function partAnimation(ts){
-  if(!startTime) startTime = ts;
-  const p = Math.min((ts-startTime)/PART_DUR, 1);
-  const eased = p<.5 ? 2*p*p : -1+(4-2*p)*p;
-  drawAll(eased);
-  if(p<1){
+  setTimeout(()=>{
     requestAnimationFrame(partAnimation);
-  } else {
-    canvas.style.transition='opacity .5s ease';
-    canvas.style.opacity='0';
-    document.getElementById('page-bg').classList.add('on');
-    document.getElementById('message').classList.add('visible');
-    document.getElementById('hint').classList.add('visible');
-    setTimeout(()=>canvas.remove(), 600);
-  }
-}
+  }, 5000);
 
-function prepareVectors(){
-  const cx=W/2, cy=H/2;
-  const diag = Math.sqrt(W*W+H*H);
-  items.forEach(it=>{
-    const dx = it.ox-cx, dy = it.oy-cy;
-    const dist = Math.sqrt(dx*dx+dy*dy)||1;
-    const push = diag * 0.9;
-    it.tx = (dx/dist)*push;
-    it.ty = (dy/dist)*push;
+  // ── CURSOR & INTERACTION ──
+  const cursor = document.getElementById('cursor');
+  let lastX=-999,lastY=-999,lastSpawn=0;
+  
+  document.addEventListener('mousemove',e=>{
+    cursor.style.left=e.clientX+'px';
+    cursor.style.top=e.clientY+'px';
+    const now=Date.now(),dx=e.clientX-lastX,dy=e.clientY-lastY;
+    if(Math.sqrt(dx*dx+dy*dy)>30&&now-lastSpawn>120){
+      spawnTrail(e.clientX,e.clientY);
+      lastX=e.clientX;lastY=e.clientY;lastSpawn=now;
+    }
   });
-}
-prepareVectors();
+  
+  document.addEventListener('click',e=>spawnPermanent(e.clientX,e.clientY));
 
-// Trigger animation after 5 seconds
-setTimeout(()=>{
-  requestAnimationFrame(partAnimation);
-}, 5000);
-
-// ── CURSOR ──
-const cursor = document.getElementById('cursor');
-let lastX=-999,lastY=-999,lastSpawn=0;
-document.addEventListener('mousemove',e=>{
-  cursor.style.left=e.clientX+'px';
-  cursor.style.top=e.clientY+'px';
-  const now=Date.now(),dx=e.clientX-lastX,dy=e.clientY-lastY;
-  if(Math.sqrt(dx*dx+dy*dy)>30&&now-lastSpawn>120){
-    spawnTrail(e.clientX,e.clientY);
-    lastX=e.clientX;lastY=e.clientY;lastSpawn=now;
+  function buildStem(h,w,cls){
+    const cx=30,l1=Math.round(h*.38),l2=Math.round(h*.63);
+    return `<svg class="${cls}" width="60" height="${h}" viewBox="0 0 60 ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block">
+      <path d="M${cx} ${h} Q${cx+w} ${h*.5} ${cx} 0" stroke="#5aaa6a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M${cx} ${l1} Q${cx+18} ${l1-10} ${cx+22} ${l1-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M${cx} ${l2} Q${cx-18} ${l2-10} ${cx-22} ${l2-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>`;
   }
-});
-document.addEventListener('click',e=>spawnPermanent(e.clientX,e.clientY));
+  
+  function spawnTrail(x,y){
+    const stemH=rand(56,86),headSz=rand(20,30),wob=rand(-18,18);
+    const u=document.createElement('div');
+    u.className='trail-bloom';
+    u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
+    u.innerHTML=`<div style="position:absolute;font-size:${headSz}px;top:0;left:50%;transform:translateX(-50%)">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
+    document.body.appendChild(u);
+    setTimeout(()=>u.remove(),1700);
+  }
+  
+  function spawnPermanent(x,y){
+    const stemH=rand(120,195),headSz=rand(30,44),wob=rand(-26,26);
+    const u=document.createElement('div');
+    u.className='click-bloom';
+    u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
+    u.innerHTML=`<div class="c-head" style="font-size:${headSz}px;top:0">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
+    document.body.appendChild(u);
+    setTimeout(()=>{u.classList.add('fading');setTimeout(()=>u.remove(),3000);},180000);
+  }
+  
+  function spawnAmbient(){
+    const el=document.createElement('div');
+    el.className='ap';
+    el.textContent=pick(AMBIENT);
+    el.style.left=(Math.random()*100)+'vw';
+    el.style.top='-30px';
+    const dur=9+Math.random()*10;
+    el.style.animationDuration=dur+'s';
+    el.style.fontSize=(10+Math.random()*11)+'px';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),dur*1000+500);
+  }
+  
+  setInterval(spawnAmbient,1000);
+  for(let i=0;i<8;i++) setTimeout(spawnAmbient,i*250);
 
-function buildStem(h,w,cls){
-  const cx=30,l1=Math.round(h*.38),l2=Math.round(h*.63);
-  return `<svg class="${cls}" width="60" height="${h}" viewBox="0 0 60 ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block">
-    <path d="M${cx} ${h} Q${cx+w} ${h*.5} ${cx} 0" stroke="#5aaa6a" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l1} Q${cx+18} ${l1-10} ${cx+22} ${l1-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l2} Q${cx-18} ${l2-10} ${cx-22} ${l2-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
-  </svg>`;
-}
-function spawnTrail(x,y){
-  const stemH=rand(56,86),headSz=rand(20,30),wob=rand(-18,18);
-  const u=document.createElement('div');
-  u.className='trail-bloom';
-  u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
-  u.innerHTML=`<div style="position:absolute;font-size:${headSz}px;top:0;left:50%;transform:translateX(-50%)">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
-  document.body.appendChild(u);
-  setTimeout(()=>u.remove(),1700);
-}
-function spawnPermanent(x,y){
-  const stemH=rand(120,195),headSz=rand(30,44),wob=rand(-26,26);
-  const u=document.createElement('div');
-  u.className='click-bloom';
-  u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
-  u.innerHTML=`<div class="c-head" style="font-size:${headSz}px;top:0">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
-  document.body.appendChild(u);
-  setTimeout(()=>{u.classList.add('fading');setTimeout(()=>u.remove(),3000);},180000);
-}
-function spawnAmbient(){
-  const el=document.createElement('div');
-  el.className='ap';
-  el.textContent=pick(AMBIENT);
-  el.style.left=(Math.random()*100)+'vw';
-  el.style.top='-30px';
-  const dur=9+Math.random()*10;
-  el.style.animationDuration=dur+'s';
-  el.style.fontSize=(10+Math.random()*11)+'px';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),dur*1000+500);
-}
-setInterval(spawnAmbient,1000);
-for(let i=0;i<8;i++) setTimeout(spawnAmbient,i*250);
+  // Handle window resizing without crashing
+  window.onresize = function() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildItems();
+    prepareVectors();
+    drawAll(0);
+  };
+};
 </script>
 </body>
 </html>

@@ -76,15 +76,15 @@
   <div class="greeting">Hey <span>Varsha</span> 🌹</div>
   <div class="divider"></div>
   <div class="body">
-    I see you. I really do.<br>
     I know things feel heavy right now.<br>
     The weight of carrying so much all at once,<br>
     that's real, and it's okay to feel it.<br><br>
+	I see you. I really do.<br>
     <strong>You matter far more than anything out there.</strong><br>
-    Someone is always here for you,<br>
+    I am always here for you,<br>
     thinking of you every single day.<br><br>
-    Drink water. Eat something warm. Rest a little.<br>
-    Be soft with yourself today.<br><br>
+    Be safe. Eat something. Rest a little.<br>
+    Be soft with yourself.<br><br>
     <strong>You are enough, Varsha. Always. 🌹</strong>
   </div>
   <div class="sign">— someone who means it 💕</div>
@@ -92,7 +92,7 @@
 <div id="hint">move to bloom · click to plant 🌹</div>
 
 <script>
-const FLOWERS = ['🌹','🌹','🌹','🌺','🌸','🌷','🪷','🌹','🌸','🌺','🌷','🌹'];
+const FLOWERS = ['🌹','🌹','🌹','🌺','🌸','🌷','🪷','🌹','🌷','🌺','🌷','🌹'];
 const LEAVES  = ['🍃','🌿','🍀','🌱','🍃','🌿'];
 const AMBIENT = ['🌸','🌺','🌷','🌹','🪷','🍃','🌿'];
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
@@ -105,7 +105,7 @@ const W = canvas.width  = window.innerWidth;
 const H = canvas.height = window.innerHeight;
 
 // Build flower positions — dense scatter, 4 passes
-const STEP = 56;
+const STEP = 75;
 const items = [];
 
 function buildItems(){
@@ -114,10 +114,10 @@ function buildItems(){
   passes.forEach(([ox,oy])=>{
     for(let r=-1;r<=rows;r++){
       for(let c=-1;c<=cols;c++){
-        const x = c*STEP + ox + rand(-STEP*.38, STEP*.38);
-        const y = r*STEP + oy + rand(-STEP*.38, STEP*.38);
+        const x = c*STEP + ox + rand(-STEP*.3, STEP*.3);
+        const y = r*STEP + oy + rand(-STEP*.3, STEP*.3);
         if(x<-STEP||x>W+STEP||y<-STEP||y>H+STEP) continue;
-        const fSize = rand(18,30);
+        const fSize = rand(75,82);
         const lSize = fSize*rand(.4,.52);
         const rot   = rand(-25,25);
         items.push({
@@ -140,7 +140,7 @@ buildItems();
 function drawAll(progress){
   ctx.clearRect(0,0,W,H);
   // fill bg so no gaps show
-  ctx.fillStyle = '#c94f6a';
+  ctx.fillStyle = '#7a1f33';
   ctx.fillRect(0,0,W,H);
 
   items.forEach(it=>{
@@ -230,21 +230,21 @@ document.addEventListener('mousemove',e=>{
 document.addEventListener('click',e=>spawnPermanent(e.clientX,e.clientY));
 
 function buildStem(h,w,cls){
-  const cx=30,l1=Math.round(h*.30),l2=Math.round(h*.5),l3=Math.round(h*.7),l4=Math.round(h*.85);
-  return `<svg class="${cls}" width="60" height="${h}" viewBox="0 0 60 ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  const cx=40,l1=Math.round(h*.28),l2=Math.round(h*.48),l3=Math.round(h*.68),l4=Math.round(h*.86);
+  return `<svg class="${cls}" width="80" height="${h}" viewBox="0 0 80 ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block">
     <path d="M${cx} ${h} Q${cx+w} ${h*.5} ${cx} 0" stroke="#5aaa6a" stroke-width="3" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l1} Q${cx+18} ${l1-10} ${cx+22} ${l1-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l2} Q${cx-18} ${l2-10} ${cx-22} ${l2-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l3} Q${cx+18} ${l3-10} ${cx+22} ${l3-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M${cx} ${l4} Q${cx-18} ${l4-10} ${cx-22} ${l4-22}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M${cx} ${l1} Q${cx+20} ${l1-8} ${cx+30} ${l1-26}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M${cx} ${l2} Q${cx-20} ${l2-8} ${cx-30} ${l2-26}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M${cx} ${l3} Q${cx+20} ${l3-8} ${cx+30} ${l3-26}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M${cx} ${l4} Q${cx-20} ${l4-8} ${cx-30} ${l4-26}" stroke="#6aba7a" stroke-width="2" fill="none" stroke-linecap="round"/>
   </svg>`;
 }
 function spawnTrail(x,y){
-  const stemH=rand(56,86),headSz=rand(20,30),wob=rand(-18,18);
+  const headSz=rand(20,32);
   const u=document.createElement('div');
   u.className='trail-bloom';
-  u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
-  u.innerHTML=`<div style="position:absolute;font-size:${headSz}px;top:0;left:50%;transform:translateX(-50%)">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
+  u.style.cssText=`left:${x-headSz/2}px;top:${y-headSz/2}px;width:${headSz}px;height:${headSz}px;font-size:${headSz}px;line-height:1`;
+  u.textContent=pick(FLOWERS);
   document.body.appendChild(u);
   setTimeout(()=>u.remove(),1700);
 }
@@ -252,7 +252,7 @@ function spawnPermanent(x,y){
   const stemH=rand(120,195),headSz=rand(30,44),wob=rand(-26,26);
   const u=document.createElement('div');
   u.className='click-bloom';
-  u.style.cssText=`left:${x-30}px;top:${y-stemH-headSz}px;width:60px;height:${stemH+headSz}px`;
+  u.style.cssText=`left:${x-40}px;top:${y-stemH-headSz}px;width:80px;height:${stemH+headSz}px`;
   u.innerHTML=`<div class="c-head" style="font-size:${headSz}px;top:0">${pick(FLOWERS)}</div>`+buildStem(stemH,wob,'c-stem');
   document.body.appendChild(u);
   setTimeout(()=>{u.classList.add('fading');setTimeout(()=>u.remove(),3000);},180000);
